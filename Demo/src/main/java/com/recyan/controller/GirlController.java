@@ -1,11 +1,17 @@
 package com.recyan.controller;
 
-import com.recyan.dao.GirlReposity;
-import com.recyan.entity.Girl;
+import com.recyan.domain.Result;
+import com.recyan.repository.GirlRepository;
+import com.recyan.domain.Girl;
 import com.recyan.service.GirlService;
+import com.recyan.utils.ResultUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -16,14 +22,19 @@ import java.util.List;
 @RequestMapping(value  = "/hello")
 public class GirlController {
 
+    private final static Logger logger =  LoggerFactory.getLogger(GirlController.class);
+
     @Autowired
-    private GirlReposity girlReposity;
+    private GirlRepository girlRepository;
 
     @Autowired
     private Girl girl;
 
     @Autowired
     private GirlService girlService;
+
+    @Autowired
+    private Result<Girl> result;
 
     /**
      * 查询女生列表
@@ -33,24 +44,33 @@ public class GirlController {
     @GetMapping(value = "/girlList")
     public List<Girl> girlList() {
 
-        return girlReposity.findAll();
+        return girlRepository.findAll();
 
     }
 
     /**
      * 添加女生信息
-     * @param cupSize cupSize
-     * @param age 年龄
+     * @param girl 女生
      * @return 添加的女生
      */
     //@RequestMapping(value = "/addGirl", method = RequestMethod.POST)
     @PostMapping(value = "/girlAdd")
-    public Girl girlAdd(@RequestParam("cupSize") String cupSize,
-                        @RequestParam("age") Integer age) {
+    // BindingResult bindingResult 验证注释的message内容
+    public Result<Girl> girlAdd(@Valid Girl girl, BindingResult bindingResult) {
 
-        girl.setAge(age);
-        girl.setCupSize(cupSize);
-        return girlReposity.save(girl);
+       logger.info("girlAdd....");
+        //验证未通过 打印错误信息
+        if (bindingResult.hasErrors()) {
+
+            return ResultUtil.error(1, bindingResult.getFieldError().getDefaultMessage());
+        }
+
+//        girl.setAge(girl.getAge());
+//        girl.setCupSize(girl.getCupSize());
+
+        return ResultUtil.success(girlRepository.save(girl));
+
+        return result;
 
     }
 
@@ -62,7 +82,7 @@ public class GirlController {
     @GetMapping(value = "/girlQueryById/{id}")
     public Girl girlQueryById(@PathVariable("id") Integer id) {
 
-        return girlReposity.findOne(id);
+        return girlRepository.findOne(id);
     }
 
     /**
@@ -70,9 +90,10 @@ public class GirlController {
      * @param age 年龄
      * @return 查询的女生列表
      */
+    @GetMapping(value = "/girlQueryByAge/{age}")
     public List<Girl> girlQueryByAge(@PathVariable("age") Integer age) {
 
-        return girlReposity.fingbyAge(age);
+        return girlRepository.findByAge(age);
     }
 
     /**
@@ -90,7 +111,7 @@ public class GirlController {
         girl.setId(id);
         girl.setAge(age);
         girl.setCupSize(cupSize);
-        return girlReposity.save(girl);
+        return girlRepository.save(girl);
     }
 
     /**
@@ -100,7 +121,7 @@ public class GirlController {
     @DeleteMapping(value = "/updateGirl/{id}")
     public void girlDelete(@PathVariable("id") Integer id) {
 
-        girlReposity.delete(id);
+        girlRepository.delete(id);
     }
 
     @PostMapping(value = "/girlInsert")
