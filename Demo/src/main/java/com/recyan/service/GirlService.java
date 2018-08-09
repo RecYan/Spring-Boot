@@ -1,7 +1,7 @@
 package com.recyan.service;
 
-import com.recyan.dao.GirlReposity;
-import com.recyan.entity.Girl;
+import com.recyan.repository.GirlRepository;
+import com.recyan.domain.Girl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GirlService {
 
     @Autowired
-    private GirlReposity girlReposity;
+    private GirlRepository girlRepository;
 
     @Autowired
     private Girl girlA;
@@ -26,12 +26,12 @@ public class GirlService {
 
         girlA.setCupSize("B");
         girlA.setAge(20);
-        girlReposity.save(girlA);
+        girlRepository.save(girlA);
 
         girlB.setCupSize("D");
         int i = 1/0;
         girlB.setAge(23);
-        girlReposity.save(girlB);
+        girlRepository.save(girlB);
     }
 
 }
